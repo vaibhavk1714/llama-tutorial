@@ -1,12 +1,24 @@
+import os
+import streamlit as st
+from streamlit_chat import message
+import cohere
 
-from clarifai.client.workflow import Workflow
+cohere_api_key = "sx25yULmw6YEvfNlXlRp0bTiQlR7eOZc7Vsn9YOT"
 
-# Your PAT (Personal Access Token) can be found in the Account's Security section
+if not cohere_api_key:
+    raise ValueError("COHERE_API_KEY environment variable not found")
 
-# Initialize the workflow_url
-workflow_url = "https://clarifai.com/zqe0zx40ng15/Llama-2-tutorial/workflows/workflow-1bfdac"
-text_classfication_workflow = Workflow(
-    url= workflow_url , pat="f7d7faaa3c8943d0920c39c081e520d6"
-)
-result = text_classfication_workflow.predict_by_bytes(b"I hate you", input_type="text")
-print(result.results[0].outputs[0].data)
+co = cohere.Client(cohere_api_key)
+
+def get_response(prompt):
+    response = co.generate(
+        model='command',  
+        prompt=prompt,
+        max_tokens=50
+    )
+    return response.generations[0].text.strip()
+
+
+def clear_chat():
+    st.session_state.messages = [{"role": "assistant", "content": "Say something to get started!"}]
+
